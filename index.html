@@ -1896,7 +1896,7 @@
     .nrc2-hero {
       background: var(--red-light);
       color: var(--black);
-      padding: 116px 48px 0;
+      padding: 116px 48px 56px;
       max-width: 100%;
       overflow: visible;
       min-height: 520px;
@@ -4391,7 +4391,7 @@
     // ---- Page routing ----
     const pages = ['home','about','projects','resume','case-nrc','case-figma','case-coaching'];
 
-    function navigate(page) {
+    function renderPage(page) {
       pages.forEach(p => {
         const el = document.getElementById('page-' + p);
         if (el) el.classList.toggle('active', p === page);
@@ -4423,6 +4423,28 @@
       if (carouselSec) carouselSec.style.display  = isHome ? '' : 'none';
       if (homeContact) homeContact.style.display  = isHome ? '' : 'none';
     }
+
+    function navigate(page) {
+      renderPage(page);
+      // Record this navigation in browser history so Back moves between
+      // portfolio pages instead of leaving the site entirely.
+      if (!history.state || history.state.page !== page) {
+        history.pushState({ page: page }, '');
+      }
+    }
+
+    // Make sure the page we loaded on is itself a history entry, so the
+    // very first Back press has an internal state to land on.
+    if (!history.state) {
+      history.replaceState({ page: 'home' }, '');
+    }
+
+    // Handle Back/Forward: re-render the page tied to that history entry
+    // without pushing a new one.
+    window.addEventListener('popstate', function(e) {
+      const page = (e.state && e.state.page) || 'home';
+      renderPage(page);
+    });
 
     function scrollToContact() {
       navigate('home');
